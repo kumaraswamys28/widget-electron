@@ -1,0 +1,267 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Todo Widget</title>
+<style>
+  body {
+    margin: 0;
+    height: 100vh;
+    background: rgba(255, 255, 255, 0.1);
+    backdrop-filter: blur(15px) saturate(180%);
+    -webkit-backdrop-filter: blur(15px) saturate(180%);
+    border-radius: 20px;
+    box-shadow: 0 4px 20px rgba(0,0,0,0.3);
+    overflow: hidden;
+    font-family: sans-serif;
+    color: #fff;
+  }
+
+  #container {
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+    padding: 12px;
+  }
+
+  /* #input-bar {
+    display: flex;
+    align-items: center;
+    background: rgba(255,255,255,0.1);
+    border-radius: 50px;
+    padding: 8px 8px;
+    margin-bottom: 24px;
+  } */
+
+
+
+  #input-bar {
+  display: flex;
+  align-items: center;
+  background: rgba(255, 255, 255, 0.1);
+  border-radius: 50px;
+  padding: 8px 12px;
+  margin-bottom: 24px;
+  position: relative;
+  overflow: hidden;
+  z-index: 0; /* ensure base layer */
+}
+
+/* RGB Glow Animation Border */
+#input-bar::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  border-radius: 50px;
+  padding: 2px;
+  background: linear-gradient(
+    90deg,
+    red,
+    orange,
+    yellow,
+    lime,
+    cyan,
+    blue,
+    magenta,
+    red
+  );
+  background-size: 400%;
+  animation: rgbCycle 8s linear infinite;
+  -webkit-mask: 
+    linear-gradient(#000 0 0) content-box, 
+    linear-gradient(#000 0 0);
+  -webkit-mask-composite: xor;
+  mask-composite: exclude;
+  pointer-events: none; /* ✅ allow clicks/typing to pass through */
+  z-index: 1;
+}
+
+/* Keep input bar content above the pseudo border */
+#input-bar * {
+  position: relative;
+  z-index: 2;
+}
+
+/* Keyframes for RGB cycle */
+@keyframes rgbCycle {
+  0% { background-position: 0% 50%; }
+  50% { background-position: 100% 50%; }
+  100% { background-position: 0% 50%; }
+}
+
+
+
+  #add-btn {
+    width: 28px;
+    height: 28px;
+    border-radius: 50%;
+    border: none;
+    background: rgba(255,255,255,0.2);
+    color: white;
+    font-size: 20px;
+    margin-right: 8px;
+    cursor: pointer;
+  }
+
+  #task-input {
+    background: transparent;
+    border: none;
+    outline: none;
+    color: white;
+    flex: 1;
+    font-size: 14px;
+  }
+
+  #task-input::placeholder {
+    color: rgba(255, 255, 255, 0.8);
+    opacity: 1;
+  }
+
+  #tasks {
+    flex: 1;
+    overflow-y: auto;
+    scrollbar-width: none;
+  }
+
+  #tasks::-webkit-scrollbar {
+    display: none;
+  }
+
+  .buttons {
+    display: flex;
+    gap: 5%;
+  }
+
+
+  .task {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    background: rgba(255,255,255,0.1);
+    border-radius: 10px;
+    padding: 8px 10px;
+    margin: 5px 0;
+  }
+   .task span{
+    margin-left: 5%;
+   }
+
+  .task.completed {
+    opacity: 0.6;
+    text-decoration: line-through;
+  }
+
+  .task button {
+    background: rgba(255, 255, 255, 0);
+    border: none;
+    color: white;
+    cursor: pointer;
+    font-size: large;
+    height: 100%;
+  }
+
+  #resize-toggle {
+  align-self: flex-end;
+  background: rgba(255,255,255,0.15);
+  border: none;
+  color: white;
+  border-radius: 8px;
+  padding: 4px 8px;
+  cursor: pointer;
+  margin-top: auto;
+  margin-bottom: 20px; 
+}
+
+</style>
+</head>
+<body>
+  <div id="container">
+        <div id="tasks"></div>
+
+    <div id="input-bar">
+      <button id="add-btn">+</button>
+      <input id="task-input" placeholder="Add a task..." />
+    </div>
+  </div>
+
+<script>
+
+
+
+
+const tasksContainer = document.getElementById("tasks");
+const input = document.getElementById("task-input");
+const addBtn = document.getElementById("add-btn");
+const resizeBtn = document.getElementById("resize-toggle");
+
+// Load tasks from localStorage
+let tasks = JSON.parse(localStorage.getItem("tasks") || "[]");
+window.addEventListener("DOMContentLoaded", () => {
+  tasks.forEach((task) => addTask(task.text, task.completed));
+});
+
+function addTask(text, completed = false) {
+  const div = document.createElement("div");
+  div.className = "task";
+  if (completed) div.classList.add("completed");
+
+  div.innerHTML = `
+    <span>${text}</span>
+    <div class="buttons">
+      <button class="complete">🟢</button>
+      <button class="delete">🔴</button>
+    </div>`;
+  tasksContainer.appendChild(div);
+
+  div.querySelector(".complete").onclick = () => {
+    div.classList.toggle("completed");
+    saveTasks();
+  };
+  div.querySelector(".delete").onclick = () => {
+    div.remove();
+    saveTasks();
+  };
+  saveTasks();
+}
+
+addBtn.onclick = () => {
+  if (input.value.trim()) {
+    addTask(input.value.trim());
+    input.value = "";
+  }
+};
+
+input.addEventListener("keydown", (e) => {
+  if (e.key === "Enter" && input.value.trim()) {
+    addTask(input.value.trim());
+    input.value = "";
+  }
+});
+
+function saveTasks() {
+  const list = [];
+  document.querySelectorAll(".task").forEach((div) => {
+    list.push({
+      text: div.querySelector("span").textContent,
+      completed: div.classList.contains("completed"),
+    });
+  });
+  localStorage.setItem("tasks", JSON.stringify(list));
+}
+
+// 🔒 Toggle window resize (via preload bridge)
+let locked = true;
+resizeBtn.onclick = () => {
+  locked = !locked;
+  resizeBtn.textContent = locked ? "🔒" : "🔓";
+  window.electronAPI.toggleResize();
+};
+
+
+
+
+
+</script>
+</body>
+</html>
