@@ -5,6 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 <title>Todo Widget</title>
 <style>
+  
   body {
     margin: 0;
     height: 100vh;
@@ -12,7 +13,7 @@
     backdrop-filter: blur(15px) saturate(180%);
     -webkit-backdrop-filter: blur(15px) saturate(180%);
     border-radius: 20px;
-    box-shadow: 0 4px 20px rgba(0,0,0,0.3);
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0);
     overflow: hidden;
     font-family: sans-serif;
     color: #fff;
@@ -41,7 +42,7 @@
   align-items: center;
   background: rgba(255, 255, 255, 0.1);
   border-radius: 50px;
-  padding: 8px 12px;
+  padding: 8px 8px;
   margin-bottom: 24px;
   position: relative;
   overflow: hidden;
@@ -186,10 +187,6 @@
   </div>
 
 <script>
-
-
-
-
 const tasksContainer = document.getElementById("tasks");
 const input = document.getElementById("task-input");
 const addBtn = document.getElementById("add-btn");
@@ -257,11 +254,6 @@ resizeBtn.onclick = () => {
   resizeBtn.textContent = locked ? "🔒" : "🔓";
   window.electronAPI.toggleResize();
 };
-
-
-
-
-
 </script>
 </body>
 </html>
